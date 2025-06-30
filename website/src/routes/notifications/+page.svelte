@@ -21,9 +21,7 @@
 	let loading = $state(true);
 	let newNotificationIds = $state<number[]>([]);
 
-	// let me cook (please help me i only had 5 lessons from the Svelte website and a white monster energy)
-	// this is so you can finally click on a notification to go to the coin that got rugged
-	let coin = notification.message.match(/\(\*(.*?)\)/)
+	let coin = $NOTIFICATIONS.message.match(/\(\*(.*?)\)/)
 
 	onMount(async () => {
 		if (!$USER_DATA) {
@@ -134,71 +132,68 @@
 			{:else}
 				<ScrollArea class="h-[600px]">
 					<div class="space-y-1">
-						{#each $NOTIFICATIONS as notification, index (notification.id)}/fix Expected }
+						{#each $NOTIFICATIONS as notification, index (notification.id)}
 							{@const IconComponent = getNotificationIcon(notification.type)}
 							{@const isNewNotification = newNotificationIds.includes(notification.id)}
-							<button
-								class={getNotificationColorClasses(
-									notification.type,
-									isNewNotification,
-									notification.isRead
-								)}
-								{#if notification.type == "RUG_PULL"}
-									on:click={
-										goto(`/coin/${coin}`)
-									}
-								{/if}
-							>
-								<div
-									class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full {getNotificationIconColorClasses(
-										notification.type
-									)}"
+							<a href={`/coin/${coin}`}>
+								<button
+									class={getNotificationColorClasses(
+										notification.type,
+										isNewNotification,
+										notification.isRead
+									)}
 								>
-									<IconComponent class="h-4 w-4" />
-								</div>
+									<div
+										class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full {getNotificationIconColorClasses(
+											notification.type
+										)}"
+									>
+										<IconComponent class="h-4 w-4" />
+									</div>
 
-								<div class="min-w-0 flex-1">
-									<div class="mb-1 flex items-center gap-2">
-										<h3 class="truncate text-sm font-medium">{notification.title}</h3>
-										{#if !notification.isRead && !isNewNotification}
-											<div class="bg-primary h-2 w-2 flex-shrink-0 rounded-full"></div>
-										{/if}
-										{#if isNewNotification}
-											<Badge variant="default" class="px-1.5 py-0.5 text-xs">New</Badge>
+									<div class="min-w-0 flex-1">
+										<div class="mb-1 flex items-center gap-2">
+											<h3 class="truncate text-sm font-medium">{notification.title}</h3>
+											{#if !notification.isRead && !isNewNotification}
+												<div class="bg-primary h-2 w-2 flex-shrink-0 rounded-full"></div>
+											{/if}
+											{#if isNewNotification}
+												<Badge variant="default" class="px-1.5 py-0.5 text-xs">New</Badge>
+											{/if}
+										</div>
+
+										<p class="text-muted-foreground text-xs leading-relaxed">
+											{notification.message}
+										</p>
+
+										{#if notification.data}
+											<div class="mt-1 flex flex-wrap gap-1">
+												{#if notification.data.profit !== undefined}
+													<Badge
+														variant={notification.data.profit > 0 ? 'success' : 'destructive'}
+														class="px-1.5 py-0.5 text-xs"
+													>
+														{notification.data.profit > 0 ? '+' : ''}{formatValue(
+															notification.data.profit
+														)}
+													</Badge>
+												{/if}
+												{#if notification.data.resolution}
+													<Badge variant="outline" class="px-1.5 py-0.5 text-xs">
+														Resolved: {notification.data.resolution}
+													</Badge>
+												{/if}
+											</div>
 										{/if}
 									</div>
 
-									<p class="text-muted-foreground text-xs leading-relaxed">
-										{notification.message}
-									</p>
-
-									{#if notification.data}
-										<div class="mt-1 flex flex-wrap gap-1">
-											{#if notification.data.profit !== undefined}
-												<Badge
-													variant={notification.data.profit > 0 ? 'success' : 'destructive'}
-													class="px-1.5 py-0.5 text-xs"
-												>
-													{notification.data.profit > 0 ? '+' : ''}{formatValue(
-														notification.data.profit
-													)}
-												</Badge>
-											{/if}
-											{#if notification.data.resolution}
-												<Badge variant="outline" class="px-1.5 py-0.5 text-xs">
-													Resolved: {notification.data.resolution}
-												</Badge>
-											{/if}
-										</div>
-									{/if}
-								</div>
-
-								<div class="flex flex-shrink-0 flex-col items-end justify-center gap-1">
-									<p class="text-muted-foreground text-right text-xs">
-										{formatTimeAgo(notification.createdAt)}
-									</p>
-								</div>
-							</button>
+									<div class="flex flex-shrink-0 flex-col items-end justify-center gap-1">
+										<p class="text-muted-foreground text-right text-xs">
+											{formatTimeAgo(notification.createdAt)}
+										</p>
+									</div>
+								</button>
+							</a>
 
 							{#if index < $NOTIFICATIONS.length - 1}
 								<Separator />
