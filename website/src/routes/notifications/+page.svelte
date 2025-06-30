@@ -16,9 +16,14 @@
 	import { formatTimeAgo, formatValue } from '$lib/utils';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+	import { notificationTypeEnum } from '../../lib/server/db/schema';
 
 	let loading = $state(true);
 	let newNotificationIds = $state<number[]>([]);
+
+	// let me cook (please help me i only had 5 lessons from the Svelte website and a white monster energy)
+	// this is so you can finally click on a notification to go to the coin that got rugged
+	let coin = notification.message.match(/\(\*(.*?)\)/)
 
 	onMount(async () => {
 		if (!$USER_DATA) {
@@ -129,7 +134,7 @@
 			{:else}
 				<ScrollArea class="h-[600px]">
 					<div class="space-y-1">
-						{#each $NOTIFICATIONS as notification, index (notification.id)}
+						{#each $NOTIFICATIONS as notification, index (notification.id)}/fix Expected }
 							{@const IconComponent = getNotificationIcon(notification.type)}
 							{@const isNewNotification = newNotificationIds.includes(notification.id)}
 							<button
@@ -138,6 +143,11 @@
 									isNewNotification,
 									notification.isRead
 								)}
+								{#if notification.type == "RUG_PULL"}
+									on:click={
+										goto(`/coin/${coin}`)
+									}
+								{/if}
 							>
 								<div
 									class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full {getNotificationIconColorClasses(
